@@ -13,7 +13,9 @@ import MovieModal from "./components/movieModal.vue";
     <header>
       <headerVue />
     </header>
-    <moviesTableVue />
+    <div class="max-w-7xl mx-auto">
+      <moviesTableVue />
+    </div>
   </div>
 </template>
 

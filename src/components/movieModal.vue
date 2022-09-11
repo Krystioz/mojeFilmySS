@@ -52,10 +52,9 @@ const validateRules = {
   title: {
     required,
     minLength: minLength(3),
-    maxLength: maxLength(50),
-    alphaNum,
+    maxLength: maxLength(200),
   },
-  director: { minLength: minLength(3), maxLength: maxLength(20), alphaNum },
+  director: { minLength: minLength(3), maxLength: maxLength(20) },
   year: {
     minLength: minLength(3),
     maxLength: maxLength(4),
@@ -130,7 +129,6 @@ const insertMovie = (id) => {
 function updateConfirm() {
   console.log(loaded.value);
   if (!loaded.value) {
-    console.log("not loaded !");
     return;
   }
   updateMovie(props.idMovie);
@@ -183,7 +181,6 @@ const submitMovie = async () => {
       alert("no actionmode");
     }
   } else {
-    console.log("here");
     openErr.value = true;
     errMessage.value = v$.value.$errors;
     console.log(v$.value.$errors);
