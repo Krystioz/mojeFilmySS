@@ -20,6 +20,12 @@ const fetchMovies = () => {
     .then(() => setTimeout(() => (loading.value = false), 100));
 };
 
+const fetchSSmovies = () => {
+  axios
+    .get("https://filmy.programdemo.pl/MyMovies")
+    .then((res) => console.log(res));
+};
+
 async function assignData() {
   loaded.value = true;
   loading.value = true;
@@ -28,6 +34,7 @@ async function assignData() {
 </script>
 
 <template>
+  <button class="p-2" @click="fetchSSmovies()">asdasd</button>
   <div class="mx-6">
     <div class="flex flex-row align-center gap-4 mb-4">
       <MovieModal @refresh="assignData()" actionMode="insert" />
@@ -53,15 +60,12 @@ async function assignData() {
         <h1 class="mb-2">Fetching the movies</h1>
         <Spinner />
       </div>
-      <div
-        v-else
-        class="overflow-y-scroll mx-2 border-r-orange-300 sm:-mx-6 lg:-mx-8 h-96"
-      >
+      <div v-else class="overflow-y-scroll mx-2 sm:-mx-6 lg:-mx-8">
         <div v-if="loaded" class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
           <div class="overflow-hidden">
             <table class="min-w-full table-auto">
               <thead class="bg-white border-b">
-                <tr class="bg bg-blue-200">
+                <tr class="bg bg-red-400">
                   <th
                     scope="col"
                     class="text-sm font-bold text-gray-900 px-3 py-4 text-left"
@@ -108,7 +112,7 @@ async function assignData() {
                   <td
                     class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                   >
-                    {{ datas.id }}
+                    {{ index + 1 }}
                   </td>
                   <td
                     class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
