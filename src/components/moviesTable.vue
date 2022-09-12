@@ -16,27 +16,40 @@ const fetchMovies = () => {
       },
     })
     .then((res) => (data.value = res.data))
-    .then((res) => console.log(res))
-    .then(() => setTimeout(() => (loading.value = false), 100));
+    .then(() => (loading.value = false));
 };
 
-const fetchSSmovies = () => {
+const fetchAddSSmovies = () => {
+  loading.value = true;
   axios
     .get("/api/MyMovies", {
       headers: {
         "Access-Control-Allow-Origin": "*",
       },
     })
-    .then((res) => addNewMovies(res.data));
+    .then((res) => res.data)
+    .then((res) => returnNewMovies(res))
+    .then((res) => postNewMovies(res));
 };
 
-async function assignData() {
+function assignData(e) {
   loaded.value = true;
   loading.value = true;
   fetchMovies();
 }
 
-function addNewMovies(res) {
+function emitAssing(e) {
+  loaded.value = true;
+  loading.value = true;
+  fetchMovies();
+}
+
+function showLoadingData() {
+  console.log("loading value");
+  loading.value = true;
+}
+
+function returnNewMovies(res) {
   const result = res
     .map((el1) => ({
       title: el1.title,
@@ -48,31 +61,49 @@ function addNewMovies(res) {
     .filter(function (obj) {
       return obj.match != true;
     });
-
-  for (let i = 0; i < result.length; i++) {
-    axios
-      .post("https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy", {
-        title: result[i].title,
-        director: result[i].director,
-        year: result[i].year,
-        rate: result[i].rate,
-      })
-      .catch((err) => {
-        alert(err);
-        return;
-      });
-  }
-  assignData();
+  return result;
 }
+
+const postNewMovies = async (data) => {
+  const responses = [];
+  const errs = [];
+
+  for (let i = 0; i < data.length; i++) {
+    responses.push(
+      await axios
+        .post(
+          "https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy",
+          {
+            title: data[i].title,
+            director: data[i].director,
+            year: data[i].year,
+            rate: data[i].rate,
+          },
+          {
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              accept: "text/plain",
+            },
+          }
+        )
+        .then((res) => res)
+        .catch((err) => err)
+    );
+  }
+  console.log(responses);
+  console.log(responses.map((e) => e.statusText));
+  assignData();
+};
+
 onMounted(() => assignData());
 </script>
 
 <template>
   <div class="mx-6">
     <div class="flex flex-row align-center gap-4 mb-4">
-      <MovieModal @refresh="assignData()" actionMode="insert" />
+      <MovieModal @refresh="emitAssing()" actionMode="insert" />
       <button
-        @click="fetchSSmovies()"
+        @click="fetchAddSSmovies()"
         class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
       >
         <svg
@@ -83,6 +114,12 @@ onMounted(() => assignData());
           <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
         </svg>
         <span>Load movies</span>
+      </button>
+      <button
+        @click="assignData()"
+        class="bg-yellow-300 hover:bg-yellow-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
+      >
+        <span>Refresh</span>
       </button>
     </div>
     <div class="flex flex-col mb-12">
@@ -151,7 +188,7 @@ onMounted(() => assignData());
                     class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                   >
                     <MovieModal
-                      @refresh="assignData()"
+                      @refresh="emitAssing(e)"
                       :id-movie="datas.id"
                       actionMode="update"
                     />
@@ -160,7 +197,7 @@ onMounted(() => assignData());
                     class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                   >
                     <MovieModal
-                      @refresh="assignData()"
+                      @refresh="emitAssing(e)"
                       :id-movie="datas.id"
                       actionMode="delete"
                     />

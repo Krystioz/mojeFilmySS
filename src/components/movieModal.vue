@@ -8,7 +8,6 @@ import {
   maxLength,
   integer,
   between,
-  alphaNum,
 } from "@vuelidate/validators";
 import {
   Dialog,
@@ -33,6 +32,7 @@ const open = ref(false);
 const loaded = ref(false);
 const openErr = ref(false);
 const errMessage = ref({});
+const status = ref("none");
 
 const movieData = ref({
   title: "",
@@ -70,8 +70,9 @@ const validateRules = {
 };
 
 const v$ = useVuelidate(validateRules, movieData);
-function refresh() {
-  emit("refresh", true);
+
+function refreshing(e) {
+  emit("refresh", e);
 }
 
 const loadMovie = (id) => {
@@ -82,14 +83,14 @@ const loadMovie = (id) => {
         accept: "text/plain",
       },
     })
+
     .then((res) => {
       (movieData.value.title = res.data.title),
         (movieData.value.director = res.data.director),
         (movieData.value.year = res.data.year),
         (movieData.value.rate = res.data.rate);
     })
-    .then((res) => console.log(movieData.value))
-    .then(() => setTimeout(() => (loaded.value = true), 1));
+    .then(() => (loaded.value = true));
 };
 
 const updateMovie = (id) => {
@@ -101,14 +102,14 @@ const updateMovie = (id) => {
       year: movieData.value.year,
       rate: movieData.value.rate,
     })
-    .then(() => refresh())
+    .then(() => refreshing("refresh"))
     .catch((err) => console.log(err.message));
 };
 
 const deleteMovie = (id) => {
   axios
     .delete(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy/${id}`)
-    .then(() => refresh())
+    .then(() => refreshing())
     .catch((err) => console.log(err));
 };
 
@@ -120,14 +121,12 @@ const insertMovie = (id) => {
       year: movieData.value.year,
       rate: movieData.value.rate,
     })
-    .then((res) => console.log(res))
-    .then(() => refresh())
+    .then(() => refreshing())
     .then(() => (movieData.value = movieDataBase))
     .catch((err) => console.log(err));
 };
 
 function updateConfirm() {
-  console.log(loaded.value);
   if (!loaded.value) {
     return;
   }
@@ -136,9 +135,8 @@ function updateConfirm() {
 }
 
 function insertConfirm() {
-  console.log(loaded.value);
   if (!loaded.value) {
-    console.log("not loaded !");
+    alert("movies not loaded yet!");
     return;
   }
   insertMovie(props.idMovie);
@@ -146,7 +144,6 @@ function insertConfirm() {
 }
 
 function confirmDelete() {
-  console.log(loaded.value);
   if (!loaded.value) {
     return;
   }
@@ -173,17 +170,14 @@ const submitMovie = async () => {
   if (result) {
     if (props.actionMode == "insert") {
       insertConfirm();
-      alert("success insert!");
     } else if (props.actionMode == "update") {
       updateConfirm();
-      alert("success update!");
     } else {
-      alert("no actionmode");
+      alert("something went wrong");
     }
   } else {
     openErr.value = true;
     errMessage.value = v$.value.$errors;
-    console.log(v$.value.$errors);
   }
 };
 

@@ -11,6 +11,7 @@ import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 defineProps({
   open: false,
   errMessages: Object,
+  mode: String,
 });
 
 const emit = defineEmits(["closeModal"]);
@@ -74,11 +75,6 @@ function closeModal() {
                         <strong>{{ error.$property }}</strong>
                         <br />
                         <small>{{ error.$message }}</small>
-                        <!-- <strong>{{ error.$validator }}</strong>
-                        <small> on property</small>
-                        <strong>{{ error.$property }}</strong>
-                        <small> says:</small>
-                        <strong>{{ error.$message }}</strong> -->
                       </p>
                     </div>
                   </div>
