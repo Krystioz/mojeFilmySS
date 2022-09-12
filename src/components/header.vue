@@ -66,7 +66,7 @@
     </nav>
 
     <div
-      class="text-center bg-cover bg-bottom bg-[url('public/movie-theater.jpg')] bg-gray-50 text-white py-20 px-6 mb-12"
+      class="text-center bg-cover bg-bottom bg-[url('movie-theater.jpg')] bg-gray-50 text-white py-20 px-6 mb-12"
     >
       <h1 class="text-5xl font-bold mt-0 mb-6">Movies database</h1>
       <h3 class="text-3xl font-bold mb-8">Feel free to look around</h3>

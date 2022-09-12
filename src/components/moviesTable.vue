@@ -42,15 +42,10 @@ function assignData(e) {
   fetchMovies();
 }
 
-function emitAssing(e) {
+function emitAssing() {
   loaded.value = true;
   loading.value = true;
   fetchMovies();
-}
-
-function showLoadingData() {
-  console.log("loading value");
-  loading.value = true;
 }
 
 function returnNewMovies(res) {
@@ -91,10 +86,10 @@ const postNewMovies = async (data) => {
           }
         )
         .then((res) => res)
-        .catch((err) => err)
+        .catch((err) => errs.push(err))
     );
   }
-  console.log(responses);
+  console.log(errs);
   console.log(responses.map((e) => e.statusText));
   assignData();
 };
@@ -192,7 +187,7 @@ onMounted(() => assignData());
                     class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                   >
                     <MovieModal
-                      @refresh="emitAssing(e)"
+                      @refresh="emitAssing()"
                       :id-movie="datas.id"
                       actionMode="update"
                     />
@@ -201,7 +196,7 @@ onMounted(() => assignData());
                     class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                   >
                     <MovieModal
-                      @refresh="emitAssing(e)"
+                      @refresh="emitAssing()"
                       :id-movie="datas.id"
                       actionMode="delete"
                     />
