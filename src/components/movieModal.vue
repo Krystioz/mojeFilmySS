@@ -83,14 +83,14 @@ const loadMovie = (id) => {
         accept: "text/plain",
       },
     })
-
     .then((res) => {
       (movieData.value.title = res.data.title),
         (movieData.value.director = res.data.director),
         (movieData.value.year = res.data.year),
         (movieData.value.rate = res.data.rate);
     })
-    .then(() => (loaded.value = true));
+    .then(() => (loaded.value = true))
+    .catch((err) => alert(err));
 };
 
 const updateMovie = (id) => {
@@ -103,14 +103,14 @@ const updateMovie = (id) => {
       rate: movieData.value.rate,
     })
     .then(() => refreshing("refresh"))
-    .catch((err) => console.log(err.message));
+    .catch((err) => alert(err));
 };
 
 const deleteMovie = (id) => {
   axios
     .delete(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy/${id}`)
     .then(() => refreshing())
-    .catch((err) => console.log(err));
+    .catch((err) => alert(err));
 };
 
 const insertMovie = (id) => {
@@ -123,7 +123,7 @@ const insertMovie = (id) => {
     })
     .then(() => refreshing())
     .then(() => (movieData.value = movieDataBase))
-    .catch((err) => console.log(err));
+    .catch((err) => alert(err));
 };
 
 function updateConfirm() {

@@ -29,7 +29,11 @@ const fetchAddSSmovies = () => {
     })
     .then((res) => res.data)
     .then((res) => returnNewMovies(res))
-    .then((res) => postNewMovies(res));
+    .then((res) => postNewMovies(res))
+    .catch((err) => {
+      alert(err.message);
+      loading.value = false;
+    });
 };
 
 function assignData(e) {
