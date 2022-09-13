@@ -70,11 +70,23 @@ function closeModal() {
                       class="text-lg font-medium leading-6 text-gray-900"
                       >Some errors occured:</DialogTitle
                     >
-                    <div class="mt-2">
+                    <div v-if="mode == 'validation'" class="mt-2">
                       <p v-for="error of errMessages" :key="error.$uid">
                         <strong>{{ error.$property }}</strong>
                         <br />
                         <small>{{ error.$message }}</small>
+                      </p>
+                    </div>
+                    <div class="mt-4" v-else-if="mode == 'api'">
+                      <p>
+                        <strong>{{ errMessages.message }}</strong>
+                        <br />
+                        <small
+                          >{{ errMessages.name }}: {{ errMessages.code }}</small
+                        >
+                        <br />
+                        <small>url: </small
+                        ><small> {{ errMessages.config.url }}</small>
                       </p>
                     </div>
                   </div>

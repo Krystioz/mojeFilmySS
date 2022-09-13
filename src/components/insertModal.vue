@@ -24,10 +24,9 @@ import Spinner from "./spinner.vue";
 import ErrorModal from "./errorModal.vue";
 
 const props = defineProps({
-  actionMode: String,
   idMovie: Number,
 });
-const emit = defineEmits(["refresh"]);
+const emit = defineEmits(["insertEmit"]);
 const open = ref(false);
 const loaded = ref(false);
 const openErr = ref(false);
@@ -71,67 +70,8 @@ const validateRules = {
 
 const v$ = useVuelidate(validateRules, movieData);
 
-function refreshing(e) {
-  emit("refresh", e);
-}
-
-const loadMovie = (id) => {
-  axios
-    .get(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy/${id}`, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        accept: "text/plain",
-      },
-    })
-    .then((res) => {
-      (movieData.value.title = res.data.title),
-        (movieData.value.director = res.data.director),
-        (movieData.value.year = res.data.year),
-        (movieData.value.rate = res.data.rate);
-    })
-    .then(() => (loaded.value = true))
-    .catch((err) => alert(err));
-};
-
-const updateMovie = (id) => {
-  axios
-    .put(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy/${id}`, {
-      id: id,
-      Title: movieData.value.title,
-      director: movieData.value.director,
-      year: movieData.value.year,
-      rate: movieData.value.rate,
-    })
-    .then(() => refreshing("refresh"))
-    .catch((err) => alert(err));
-};
-
-const deleteMovie = (id) => {
-  axios
-    .delete(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy/${id}`)
-    .then(() => refreshing())
-    .catch((err) => alert(err));
-};
-
-const insertMovie = (id) => {
-  axios
-    .post(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy`, {
-      Title: movieData.value.title,
-      director: movieData.value.director,
-      year: movieData.value.year,
-      rate: movieData.value.rate,
-    })
-    .then(() => refreshing())
-    .then(() => (movieData.value = movieDataBase))
-    .catch((err) => alert(err));
-};
-
-function updateConfirm() {
-  if (!loaded.value) {
-    return;
-  }
-  updateMovie(props.idMovie);
-  open.value = false;
+function emmitingInsert() {
+  emit("insertEmit", movieData.value);
 }
 
 function insertConfirm() {
@@ -139,28 +79,11 @@ function insertConfirm() {
     alert("movies not loaded yet!");
     return;
   }
-  insertMovie(props.idMovie);
-  open.value = false;
-}
-
-function confirmDelete() {
-  if (!loaded.value) {
-    return;
-  }
-  deleteMovie(props.idMovie);
+  emmitingInsert();
   open.value = false;
 }
 
 function insertMode() {
-  loaded.value = true;
-  open.value = true;
-  setTimeout(() => (loaded.value = true), 1000);
-}
-function updateMode() {
-  open.value = true;
-  loadMovie(props.idMovie);
-}
-function deleteMode() {
   loaded.value = true;
   open.value = true;
 }
@@ -168,13 +91,7 @@ function deleteMode() {
 const submitMovie = async () => {
   const result = await v$.value.$validate();
   if (result) {
-    if (props.actionMode == "insert") {
-      insertConfirm();
-    } else if (props.actionMode == "update") {
-      updateConfirm();
-    } else {
-      alert("something went wrong");
-    }
+    insertConfirm();
   } else {
     openErr.value = true;
     errMessage.value = v$.value.$errors;
@@ -220,18 +137,11 @@ function setErrOpen() {
                 class="relative flex flex-col transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
               >
                 <div
-                  v-if="loaded && actionMode != 'delete'"
+                  v-if="loaded"
                   class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"
                 >
-                  <h1 class="text-center" v-if="actionMode == 'insert'">
-                    Add movie
-                  </h1>
-                  <h1
-                    class="text-center text-md"
-                    v-else-if="actionMode == 'update'"
-                  >
-                    Edit
-                  </h1>
+                  <h1 class="text-center">Add movie</h1>
+
                   <form @submit.prevent="submitMovie" action="">
                     <div class="mb-6">
                       <label
@@ -287,24 +197,16 @@ function setErrOpen() {
                       </div>
                     </div>
                     <div
-                      v-if="actionMode != 'delete'"
                       class="px-4 py-3 sm:flex mt-auto sm:flex-row-reverse sm:px-6"
                     >
                       <ErrorModal
                         :errMessages="errMessage"
                         @closeModal="setErrOpen()"
                         :open="openErr"
+                        :mode="'validation'"
                       />
-                      <button
-                        v-if="actionMode == 'update'"
-                        type="submit"
-                        class="inline-block ml-6 px-6 py-2.5 bg-green-500 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-green-600 hover:shadow-lg focus:bg-green-600 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-700 active:shadow-lg transition duration-150 ease-in-out"
-                      >
-                        Update
-                      </button>
 
                       <button
-                        v-else-if="actionMode == 'insert'"
                         type="submit"
                         class="inline-block ml-6 px-6 py-2.5 bg-green-500 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-green-600 hover:shadow-lg focus:bg-green-600 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-700 active:shadow-lg transition duration-150 ease-in-out"
                       >
@@ -326,34 +228,10 @@ function setErrOpen() {
                     </div>
                   </form>
                 </div>
-                <div
-                  v-else-if="actionMode == 'delete'"
-                  class="flex flex-col items-center justify-between my-auto"
-                >
-                  <ExclamationTriangleIcon class="h-12 mt-12" />
-                  <h2 class="text-lg my-12">
-                    Are you sure want to delete the movie ?
-                  </h2>
-                  <div class="flex flex-row gap-12 mb-12">
-                    <button
-                      @click="open = false"
-                      type="button"
-                      class="inline-block px-6 py-2.5 bg-purple-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-purple-700 hover:shadow-lg focus:bg-purple-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-purple-800 active:shadow-lg transition duration-150 ease-in-out"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      @click="confirmDelete()"
-                      type="button"
-                      class="inline-block px-6 py-2.5 bg-red-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-red-700 hover:shadow-lg focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out"
-                    >
-                      Confirm
-                    </button>
-                  </div>
-                </div>
+
                 <div
                   class="bg-white flex flex-col items-center px-4 pt-5 pb-4 sm:p-6 sm:pb-4"
-                  v-if="loaded == false && actionMode != 'delete'"
+                  v-if="loaded == false"
                 >
                   <h2 class="mb-2">Loading movie data..</h2>
                   <Spinner />
@@ -364,30 +242,12 @@ function setErrOpen() {
         </div>
       </Dialog>
     </TransitionRoot>
-    <div v-if="actionMode == 'insert'">
+    <div>
       <button
         @click="insertMode()"
         class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 hover:border-blue-500 rounded"
       >
         Add new
-      </button>
-    </div>
-    <div v-else-if="actionMode == 'update'">
-      <button
-        @click="updateMode()"
-        type="button"
-        class="inline-block px-4 py-1 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-      >
-        Edit
-      </button>
-    </div>
-    <div v-else-if="actionMode == 'delete'">
-      <button
-        @click="deleteMode()"
-        type="button"
-        class="inline-block px-4 py-1 bg-red-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-red-700 hover:shadow-lg focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out"
-      >
-        Delete
       </button>
     </div>
   </div>

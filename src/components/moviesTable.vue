@@ -1,11 +1,25 @@
 <script setup>
 import axios from "axios";
 import { ref, onMounted } from "vue";
+import { TransitionRoot } from "@headlessui/vue";
 import Spinner from "./spinner.vue";
-import MovieModal from "./movieModal.vue";
-let loading = ref(false);
-let data = ref({});
-let loaded = ref(false);
+import DeleteModal from "./deletingModal.vue";
+import EditModalVue from "./editModal.vue";
+import insertModalVue from "./insertModal.vue";
+import errorModalVue from "./errorModal.vue";
+import ErrorModal from "./errorModal.vue";
+const loading = ref(false);
+const data = ref({});
+const loaded = ref(false);
+const errMessage = ref({});
+const openErr = ref(false);
+
+function displayReqErr(err) {
+  errMessage.value = err;
+  openErr.value = true;
+  loading.value = false;
+  console.log(err);
+}
 
 const fetchMovies = () => {
   axios
@@ -16,7 +30,8 @@ const fetchMovies = () => {
       },
     })
     .then((res) => (data.value = res.data))
-    .then(() => (loading.value = false));
+    .then(() => (loading.value = false))
+    .catch((err) => displayReqErr(err));
 };
 
 const fetchAddSSmovies = () => {
@@ -30,10 +45,7 @@ const fetchAddSSmovies = () => {
     .then((res) => res.data)
     .then((res) => returnNewMovies(res))
     .then((res) => postNewMovies(res))
-    .catch((err) => {
-      alert(err.message);
-      loading.value = false;
-    });
+    .catch((err) => displayReqErr(err));
 };
 
 function assignData(e) {
@@ -42,10 +54,8 @@ function assignData(e) {
   fetchMovies();
 }
 
-function emitAssing() {
-  loaded.value = true;
-  loading.value = true;
-  fetchMovies();
+function setErrOpen() {
+  openErr.value = false;
 }
 
 function returnNewMovies(res) {
@@ -86,21 +96,66 @@ const postNewMovies = async (data) => {
           }
         )
         .then((res) => res)
-        .catch((err) => errs.push(err))
+        .catch((err) => displayReqErr(err))
     );
   }
-  console.log(errs);
   console.log(responses.map((e) => e.statusText));
   assignData();
+};
+
+//NEW METHODS ON DATABASE REFACTOR
+
+const deleteMovie = (id) => {
+  loading.value = true;
+  axios
+    .delete(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy/${id}`)
+    .then(() => fetchMovies())
+    .catch((err) => displayReqErr(err));
+};
+
+const updateMovie = (data) => {
+  loading.value = true;
+  axios
+    .put(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy/${data.id}`, {
+      id: data.id,
+      Title: data.title,
+      director: data.director,
+      year: data.year,
+      rate: data.rate,
+    })
+    .then(() => fetchMovies())
+    .catch((err) => displayReqErr(err));
+};
+
+const insertMovie = (data) => {
+  loading.value = true;
+  axios
+    .post(`https://ssfilmyapi.azurewebsites.net/api/SSmojeFilmy`, {
+      Title: data.title,
+      director: data.director,
+      year: data.year,
+      rate: data.rate,
+    })
+    .then(() => fetchMovies())
+    .catch((err) => displayReqErr(err));
 };
 
 onMounted(() => assignData());
 </script>
 
 <template>
+  <ErrorModal
+    :errMessages="errMessage"
+    @closeModal="setErrOpen()"
+    :open="openErr"
+    :mode="'api'"
+  />
   <div class="mx-6">
     <div class="flex flex-row align-center gap-4 mb-4">
-      <MovieModal @refresh="emitAssing()" actionMode="insert" />
+      <insertModalVue
+        @insertEmit="(data) => insertMovie(data)"
+        actionMode="insert"
+      />
       <button
         @click="fetchAddSSmovies()"
         class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
@@ -130,7 +185,7 @@ onMounted(() => assignData());
         <Spinner />
       </div>
       <div v-else class="overflow-y-scroll h-96 mx-2 sm:-mx-6 lg:-mx-8">
-        <div v-if="loaded" class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+        <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
           <div class="overflow-hidden">
             <table class="min-w-full table-auto">
               <thead class="bg-white border-b">
@@ -175,7 +230,6 @@ onMounted(() => assignData());
                   </th>
                 </tr>
               </thead>
-
               <tbody v-for="(datas, index) in data" :key="index">
                 <tr class="bg-gray-100 border-b">
                   <td
@@ -186,19 +240,17 @@ onMounted(() => assignData());
                   <td
                     class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                   >
-                    <MovieModal
-                      @refresh="emitAssing()"
+                    <EditModalVue
+                      @updateEmit="(data) => updateMovie(data)"
                       :id-movie="datas.id"
-                      actionMode="update"
                     />
                   </td>
                   <td
                     class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                   >
-                    <MovieModal
-                      @refresh="emitAssing()"
+                    <DeleteModal
+                      @delete="(id) => deleteMovie(id)"
                       :id-movie="datas.id"
-                      actionMode="delete"
                     />
                   </td>
 
