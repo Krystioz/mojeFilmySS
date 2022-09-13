@@ -37,7 +37,7 @@ const fetchMovies = () => {
 const fetchAddSSmovies = () => {
   loading.value = true;
   axios
-    .get("/api/MyMovies", {
+    .get("https://filmy.programdemo.pl/MyMovies", {
       headers: {
         "Access-Control-Allow-Origin": "*",
       },
