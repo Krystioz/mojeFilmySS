@@ -6,8 +6,6 @@ import vue from "@vitejs/plugin-vue";
 // https://vitejs.dev/config/
 export default defineConfig({
   //disabling proxy for production
-  publicDir: "",
-  server: {
     open: true,
     proxy: {
       "/api": {
