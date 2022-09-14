@@ -1,3 +1,10 @@
+<script setup>
+import { TransitionRoot } from "@headlessui/vue";
+import { onMounted, ref } from "vue";
+const loaded = ref(false);
+
+onMounted(() => (loaded.value = true));
+</script>
 <template>
   <header>
     <nav
@@ -64,12 +71,20 @@
         </div>
       </div>
     </nav>
-
-    <div
-      class="text-center bg-cover bg-bottom bg-[url('assets/movie-theater.jpg')] bg-gray-50 text-white py-20 px-6 mb-12"
+    <TransitionRoot
+      appear
+      as="template"
+      :show="loaded"
+      enter="transition-opacity duration-500"
+      enter-from="opacity-10"
+      enter-to="opacity-100"
     >
-      <h1 class="text-5xl font-bold mt-0 mb-6">Movies database</h1>
-      <h3 class="text-3xl font-bold mb-8">Feel free to look around</h3>
-    </div>
+      <div
+        class="text-center bg-cover bg-bottom bg-[url('assets/movie-theater.jpg')] bg-gray-50 text-white py-20 px-6 mb-12"
+      >
+        <h1 class="text-5xl font-bold mt-0 mb-6">Movies database</h1>
+        <h3 class="text-3xl font-bold mb-8">Feel free to look around</h3>
+      </div>
+    </TransitionRoot>
   </header>
 </template>

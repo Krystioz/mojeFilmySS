@@ -184,102 +184,109 @@ onMounted(() => assignData());
         <h1 class="mb-2">Fetching the movies</h1>
         <Spinner />
       </div>
-      <div v-else class="overflow-y-scroll h-96 mx-2 sm:-mx-6 lg:-mx-8">
-        <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
-          <div class="overflow-hidden">
-            <table class="min-w-full table-auto">
-              <thead class="bg-white border-b">
-                <tr class="bg bg-red-400">
-                  <th
-                    scope="col"
-                    class="text-sm font-bold text-gray-900 px-3 py-4 text-left"
-                  >
-                    #id
-                  </th>
-                  <th
-                    scope="col"
-                    class="text-sm font-medium text-gray-900 px-0 py-4 text-left"
-                  ></th>
-                  <th
-                    scope="col"
-                    class="text-sm font-medium text-gray-900 px-0 py-4 text-left"
-                  ></th>
-                  <th
-                    scope="col"
-                    class="text-md font-bold text-gray-900 px-6 py-4 text-left"
-                  >
-                    title
-                  </th>
-                  <th
-                    scope="col"
-                    class="text-md font-bold text-gray-900 px-6 py-4 text-left"
-                  >
-                    director
-                  </th>
-                  <th
-                    scope="col"
-                    class="text-md font-bold text-gray-900 px-6 py-4 text-left"
-                  >
-                    year
-                  </th>
-                  <th
-                    scope="col"
-                    class="text-md font-bold text-gray-900 px-6 py-4 text-left"
-                  >
-                    rate
-                  </th>
-                </tr>
-              </thead>
-              <tbody v-for="(datas, index) in data" :key="index">
-                <tr class="bg-gray-100 border-b">
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                  >
-                    {{ index + 1 }}
-                  </td>
-                  <td
-                    class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                  >
-                    <EditModalVue
-                      @updateEmit="(data) => updateMovie(data)"
-                      :id-movie="datas.id"
-                    />
-                  </td>
-                  <td
-                    class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                  >
-                    <DeleteModal
-                      @delete="(id) => deleteMovie(id)"
-                      :id-movie="datas.id"
-                    />
-                  </td>
+      <TransitionRoot
+      :show="!loading"
+      enter="transition-opacity duration-500"
+      enter-from="opacity-0"
+      enter-to="opacity-100"
+    >
+        <div  class="overflow-y-scroll h-96 mx-2 sm:-mx-6 lg:-mx-8">
+          <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+            <div class="overflow-hidden">
+              <table class="min-w-full table-auto">
+                <thead class="bg-white border-b">
+                  <tr class="bg bg-red-400">
+                    <th
+                      scope="col"
+                      class="text-sm font-bold text-gray-900 px-3 py-4 text-left"
+                    >
+                      #id
+                    </th>
+                    <th
+                      scope="col"
+                      class="text-sm font-medium text-gray-900 px-0 py-4 text-left"
+                    ></th>
+                    <th
+                      scope="col"
+                      class="text-sm font-medium text-gray-900 px-0 py-4 text-left"
+                    ></th>
+                    <th
+                      scope="col"
+                      class="text-md font-bold text-gray-900 px-6 py-4 text-left"
+                    >
+                      title
+                    </th>
+                    <th
+                      scope="col"
+                      class="text-md font-bold text-gray-900 px-6 py-4 text-left"
+                    >
+                      director
+                    </th>
+                    <th
+                      scope="col"
+                      class="text-md font-bold text-gray-900 px-6 py-4 text-left"
+                    >
+                      year
+                    </th>
+                    <th
+                      scope="col"
+                      class="text-md font-bold text-gray-900 px-6 py-4 text-left"
+                    >
+                      rate
+                    </th>
+                  </tr>
+                </thead>
+                <tbody v-for="(datas, index) in data" :key="index">
+                  <tr class="bg-gray-100 border-b">
+                    <td
+                      class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                    >
+                      {{ index + 1 }}
+                    </td>
+                    <td
+                      class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                    >
+                      <EditModalVue
+                        @updateEmit="(data) => updateMovie(data)"
+                        :id-movie="datas.id"
+                      />
+                    </td>
+                    <td
+                      class="px-0 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                    >
+                      <DeleteModal
+                        @delete="(id) => deleteMovie(id)"
+                        :id-movie="datas.id"
+                      />
+                    </td>
 
-                  <td
-                    class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
-                  >
-                    {{ datas.title }}
-                  </td>
-                  <td
-                    class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
-                  >
-                    {{ datas.director }}
-                  </td>
-                  <td
-                    class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
-                  >
-                    {{ datas.year }}
-                  </td>
-                  <td
-                    class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
-                  >
-                    {{ datas.rate }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    <td
+                      class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
+                    >
+                      {{ datas.title }}
+                    </td>
+                    <td
+                      class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
+                    >
+                      {{ datas.director }}
+                    </td>
+                    <td
+                      class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
+                    >
+                      {{ datas.year }}
+                    </td>
+                    <td
+                      class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap"
+                    >
+                      {{ datas.rate }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
+      </TransitionRoot>
     </div>
   </div>
 </template>
